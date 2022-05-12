@@ -196,22 +196,17 @@ class Bot:
         self.updater.stop()
 
     @staticmethod
-    def start(update: Update, context: CallbackContext):
-        context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
-        print(update.effective_chat.title)
-
-    @staticmethod
     def help(update: Update, context: CallbackContext):
-        help_message = f"/start welcome you\n/list list all available feeds\n" \
+        help_message = f"/list shows all categories and their relative IDs to be activated with\n"\
                        f"/active list all active feeds\n" \
                        f"/enable followed by the category IDs or 'all', enable one or more feeds update (separated by a whitespace)\n" \
-                       f"/disable followed by category IDs or 'all', disable one or more feeds update (separated by a whitespace)"
+                       f"/disable followed by category IDs or 'all', disable one or more feeds update (separated by a whitespace)\n" \
+                       f"/help shows what each command does"
         context.bot.send_message(chat_id=update.effective_chat.id, text=help_message)
 
 
 def main(bot: Bot) -> None:
     bot.add_msg_handler(Filters.text & (~Filters.command), bot.add_chat_group)
-    bot.add_command("start", Bot.start)
     bot.add_command("list", bot.list_categories)
     bot.add_command("active", bot.active_categories)
     bot.add_command('enable', bot.enable)

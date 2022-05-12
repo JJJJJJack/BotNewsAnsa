@@ -1,10 +1,11 @@
 from database import Database
+from lxml import etree, html
 from io import StringIO
-from lxml import etree
 import asyncio
 import logging
 import httpx
 import time
+import sys
 
 
 class RssParser:
@@ -85,16 +86,27 @@ class RssParser:
             self.bot_db.update_epoch(int(time.time()), catid)
             new_feeds[catid] = rss_new_items
 
-    @staticmethod
-    async def parse_link_metas(link) -> tuple:
-        resp = httpx.get(link).text
-        parser = etree.HTMLParser()
+    async def parse_link_metas(self, link):
+        resp = httpx.get(link)
+        if resp.status_code == 301:
+            logging.warning(f"This link gave 301 response: {link}")
+            print(f"This link gave 301 response: {link}")
+            return None
         try:
-            html_root = etree.parse(StringIO(resp), parser)
+            html_root = html.parse(StringIO(resp.text))
         except etree.XMLSyntaxError:
-            print(f"LINK THAT BROKE THE SCRIPT: {link}")
-        html_root = etree.parse(StringIO(resp), parser)
-        title = html_root.xpath("//meta[@name='EdTitle']/@content")
+            print(f"LINK THAT BROKE THE SCRIPT WITH XMLSyntaxError: {link}\n"
+                  f"resp is = {resp}\n"
+                  f"resp text = {resp.text}")
+            sys.exit(-1)
+        html_root = html.parse(StringIO(resp.text))
+        try:
+            title = html_root.xpath("//meta[@name='EdTitle']/@content")
+        except AssertionError:
+            print(f"link that broke the script with assertion error = {link}\n"
+                  f"resp is = {resp}\n"
+                  f"resp text is _ {resp.text}")
+            sys.exit(-1)
         if not title:
             title = ''
         else:
@@ -104,12 +116,19 @@ class RssParser:
             descr = title
         else:
             descr = f'{title}{descr[0]}'
-        img = html_root.xpath("//meta[@name='twitter:image:src']/@content")[0]
-        try:
-            if img.endswith('.0'):
-                img = html_root.xpath("//meta[@property='og:image']/@content")[0]
-                if img.endswith('.0'):
-                    img = "https://www.ansa.it/sito/img/ico/ansa-700x366-precomposed.png"
-        except IndexError:
-            print(img)
+        img = self.fetch_correct_img(html_root)
         return title, descr, img, link
+
+    @staticmethod
+    def fetch_correct_img(html_root: etree._ElementTree) -> str:
+        """ Search for best img candidate to publish with the news post """
+        try:
+            img = html_root.xpath("//meta[@name='twitter:image:src']/@content")
+            if img and not img[0].endswith('.0'):
+                return img[0]
+            img = html_root.xpath("//meta[@property='og:image']/@content")
+            if img and not img[0].endswith('.0'):
+                return img[0]
+            return "https://www.ansa.it/sito/img/ico/ansa-700x366-precomposed.png"
+        except Exception as e:
+            print(f"{e} ERROR WHILE PARSING IMG IN RSSPARSER")

@@ -111,13 +111,13 @@ class Database:
         self.exec("UPDATE categories SET epoch = ?", [int(time.time())])
         self.commit()
 
-    def _update_last_news_into_channel_categories(self, descr: str, cat_id: int, channel_id: int) -> None:
+    def _update_last_news_into_channel_categories(self, title: str, cat_id: int, channel_id: int) -> None:
         """ Insert last news title in its category """
         self.exec("UPDATE channel_categories SET last_news = ? WHERE (category_id = ? AND channel_id = ?)",
-                  [descr, cat_id, channel_id])
+                  [title, cat_id, channel_id])
         self.commit()
 
-    def check_last_news(self, channel_id: int, news_descr: str, cat_id: int) -> bool:
+    def check_last_news(self, channel_id: int, news_title: str, cat_id: int) -> bool:
         """ Check if the news is already been published in the chat """
         self.exec("SELECT category_id  FROM channel_categories WHERE channel_id = ?",
                   [channel_id])
@@ -126,9 +126,9 @@ class Database:
         self.exec("SELECT category_id, last_news FROM channel_categories")
         catid_lastnews = {x[0]: x[1] for x in self.cursor.fetchall()}
         for catid in active_categories:
-            if catid_lastnews[catid] == news_descr:
+            if catid_lastnews[catid] == news_title:
                 return True
-        self._update_last_news_into_channel_categories(news_descr, cat_id, channel_id)
+        self._update_last_news_into_channel_categories(news_title, cat_id, channel_id)
         return False
 
     def channel_update_or_insert(self, chat_id: int, chat_name: str) -> None:

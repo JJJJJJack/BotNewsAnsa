@@ -64,6 +64,7 @@ class Bot:
                     print(f'Updating done and posted! See you in 1 minute <3')
                 except telegram.error.BadRequest as e:
                     print(f'{e.args} telegram.error.BadRequest occurred, ignoring this route of update')
+                    continue
                 except etree.XMLSyntaxError as e:
                     print(f'{e} etree.XMLSyntaxError occurred, ignoring this route of update')
                 except etree.Error as e:

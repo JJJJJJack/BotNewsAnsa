@@ -115,7 +115,7 @@ class RssParser:
         if not descr:
             descr = title
         else:
-            descr = f'{title}{descr[0]}'
+            descr = f'{descr[0]}'
         img = self.fetch_correct_img(html_root)
         return title, descr, img, link
 

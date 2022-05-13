@@ -93,7 +93,7 @@ class Bot:
         category_name = cat_post[0]
         catid = self.id_categories[category_name]
         news_list = cat_post[1:]
-        news_list = list(reversed(news_list))  # reverse list so posts get picked from least recent
+        news_list = list(reversed(news_list))  # reverse list so posts get picked from the least recent
         for title_descr_img_link in news_list:
             if title_descr_img_link == news_list[-1]:
                 await self._send_message(channel_id, title_descr_img_link, catid, last_one=True)
@@ -110,7 +110,7 @@ class Bot:
             if last_one:
                 if not self.DB.check_last_news(channel_id, title, catid):
                     self.updater.bot.send_photo(chat_id=channel_id, photo=img,
-                                                caption=f'{title}.\n{descr[:-6]}\n[Read more]({link})',
+                                                caption=f'{title}{descr[:-6]}\n[Read more]({link})',
                                                 parse_mode='markdown')
         except telegram.error.Unauthorized:
             await self._remove_chat(channel_id)

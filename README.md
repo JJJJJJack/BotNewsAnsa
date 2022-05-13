@@ -8,7 +8,7 @@ Here's a sneak peek to its look:
 
 ## List of `/commands`
 > ### /help
-> ![helpimg](/previews/help.jpg)
+> ![helpimg](/previews/help.jpg | width=100)
 
 > ### /list 
 > ![listimg](/previews/list.jpg)

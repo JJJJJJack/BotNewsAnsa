@@ -4,7 +4,7 @@ If you wanna jump straight into using it, send him the command `/help` to see wh
 
 Here's a sneak peek to its look:
 
-![sneak peek](/previews/sneak.jpg | width=100)
+![sneak peek](/previews/sneak.jpg)
 
 ## List of `/commands`
 > ### /help

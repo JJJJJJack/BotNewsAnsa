@@ -14,7 +14,7 @@ Here's a sneak peek to its look:
 > ![listimg](/previews/list.jpg)
 
 > ### /active
-> ![activeimg](/previews/list.jpg)
+> ![activeimg](/previews/active.jpg)
 
 > ### /enable IDs|"all"
 > ![enableimg](/previews/enable.jpg)

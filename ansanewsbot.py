@@ -162,6 +162,9 @@ class Bot:
             context.bot.send_message(chat_id=update.effective_chat.id, text='At least one argument is needed!')
             return
         added = self.DB.enable_cat(update.effective_chat.id, cats_ids)
+        if not added:
+            context.bot.send_message(chat_id=update.effective_chat.id, text=f"Provided ID is invalid!")
+            return
         added = " ".join(added)
         context.bot.send_message(chat_id=update.effective_chat.id, text=f"You are gonna receive feeds from {added}")
 
@@ -172,6 +175,9 @@ class Bot:
             context.bot.send_message(chat_id=update.effective_chat.id, text='At least one argument is needed!')
             return
         deleted = self.DB.disable_cat(update.effective_chat.id, cats_ids)
+        if not deleted:
+            context.bot.send_message(chat_id=update.effective_chat.id, text=f"Provided ID is invalid!")
+            return
         deleted = " ".join(deleted)
         context.bot.send_message(chat_id=update.effective_chat.id, text=f"You are not gonna receive news from {deleted}")
 

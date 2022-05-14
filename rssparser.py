@@ -87,7 +87,7 @@ class RssParser:
             new_feeds[catid] = rss_new_items
 
     async def parse_link_metas(self, link):
-        resp = httpx.get(link)
+        resp = httpx.get(link, follow_redirects=True)
         if resp.status_code == 301:
             logging.warning(f"This link gave 301 response: {link}")
             print(f"This link gave 301 response: {link}")

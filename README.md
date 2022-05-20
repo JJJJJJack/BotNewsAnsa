@@ -18,8 +18,10 @@ Here's a sneak peek to its look:
 
  ### /enable IDs|"all"
 > You can add multiple IDs separeted by whitespaces to enable multiple feeds at once or the `all` keyword to enable all the feeds
+> 
 > <img src="/previews/enable.jpg"  width="400" height="175" />
 
  ### /disable IDs|"all"
 > You can add multiple IDs separeted by whitespaces to disable multiple feeds at once or the `all` keyword to disable all the feeds
+> 
 > <img src="/previews/disable.jpg"  width="400" height="173" />

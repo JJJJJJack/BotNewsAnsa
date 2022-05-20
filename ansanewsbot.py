@@ -105,27 +105,31 @@ class Bot:
         """ Separating 'send_message' so that it can be called by '_spread_news'
             as many async tasks in the same time and wait the last one
             (4096 is the max length of a telegram message) """
-        try:
-            title, descr, img, link = title_descr_img_link
-            if last_one:
-                if not self.DB.check_last_news(channel_id, title, catid):
-                    self.updater.bot.send_photo(chat_id=channel_id, photo=img,
-                                                caption=f'{title}{descr[:-6]}\n[Read more]({link})',
-                                                parse_mode='markdown')
-        except telegram.error.Unauthorized:
-            await self._remove_chat(channel_id)
-        except telegram.error.TimedOut as e:
-            print(f'{e.args} occurred trying to send photo update')
-            raise
-        except telegram.error.BadRequest as e:
-            print(f'{e.args}: printing self.updater.bot.send_photo args:\n'
-                  f'channel id: {channel_id}\n'
-                  f'image: {img}\n'
-                  f'description: {descr}')
-            raise
-        except telegram.error.RetryAfter as e:
-            print(f'{e.args} occurred trying to send photo update, not sending photo, nor updating epoch')
-            raise
+        sent: bool = False
+        counter: int = 2048
+        title, descr, img, link = title_descr_img_link
+        while not sent and counter:
+            try:
+                if last_one:
+                    if not self.DB.check_last_news(channel_id, title, catid):
+                        self.updater.bot.send_photo(chat_id=channel_id, photo=img,
+                                                    caption=f'{title}{descr[:-6]}\n[Read more]({link})',
+                                                    parse_mode='markdown', timeout=30)
+                        sent = True
+            except telegram.error.Unauthorized:
+                await self._remove_chat(channel_id)
+            except telegram.error.TimedOut as e:
+                print(f'{e} (NOT RAISED) occurred trying to send photo update, retrying to send the news...')
+                counter >>= 1
+            except telegram.error.BadRequest as e:
+                print(f'{e.args}: printing self.updater.bot.send_photo args:\n'
+                      f'channel id: {channel_id}\n'
+                      f'image: {img}\n'
+                      f'description: {descr}')
+                raise
+            except telegram.error.RetryAfter as e:
+                print(f'{e.args} occurred trying to send photo update, not sending photo, nor updating epoch')
+                raise
 
     async def _remove_chat(self, chat_id: int) -> None:
         self.DB.exec("DELETE FROM channels WHERE channel_id = ?", [chat_id])
@@ -203,7 +207,7 @@ class Bot:
 
     @staticmethod
     def help(update: Update, context: CallbackContext):
-        help_message = f"/list shows all categories and their relative IDs to be activated with\n"\
+        help_message = f"/list shows all categories and their relative IDs to be activated with\n" \
                        f"/active list all active feeds\n" \
                        f"/enable followed by the category IDs or 'all', enable one or more feeds update (separated by a whitespace)\n" \
                        f"/disable followed by category IDs or 'all', disable one or more feeds update (separated by a whitespace)\n" \

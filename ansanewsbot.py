@@ -95,32 +95,31 @@ class Bot:
         news_list = cat_post[1:]
         news_list = list(reversed(news_list))  # reverse list so posts get picked from the least recent
         for title_descr_img_link in news_list:
-            if title_descr_img_link == news_list[-1]:
-                await self._send_message(channel_id, title_descr_img_link, catid, last_one=True)
-            else:
-                await self._send_message(channel_id, title_descr_img_link, catid)
+            await self._send_message(channel_id, title_descr_img_link, catid)
             await asyncio.sleep(3)
 
-    async def _send_message(self, channel_id: int, title_descr_img_link: tuple, catid: int, last_one: bool = False) -> None:
+    async def _send_message(self, channel_id: int, title_descr_img_link: tuple, catid: int) -> None:
         """ Separating 'send_message' so that it can be called by '_spread_news'
             as many async tasks in the same time and wait the last one
             (4096 is the max length of a telegram message) """
-        sent: bool = False
-        counter: int = 2048
+        countdown: int = 2048
         title, descr, img, link = title_descr_img_link
-        while not sent and counter:
+        while countdown:
             try:
-                if last_one:
-                    if not self.DB.check_last_news(channel_id, title, catid):
-                        self.updater.bot.send_photo(chat_id=channel_id, photo=img,
-                                                    caption=f'{title}{descr[:-6]}\n[Read more]({link})',
-                                                    parse_mode='markdown', timeout=30)
-                        sent = True
+                if self.DB.check_last_news(channel_id, title, catid):
+                    break
+                self.updater.bot.send_photo(chat_id=channel_id, photo=img,
+                                            caption=f'{title}{descr[:-6]}\n[Read more]({link})',
+                                            parse_mode='markdown')
+                break
             except telegram.error.Unauthorized:
                 await self._remove_chat(channel_id)
+                break
             except telegram.error.TimedOut as e:
-                print(f'{e} (NOT RAISED) occurred trying to send photo update, retrying to send the news...')
-                counter >>= 1
+                print(f'{e} (NOT RAISED) occurred trying to send photo update, retrying to send the news...\n'
+                      f' countdown {countdown}')
+                countdown >>= 1
+                await asyncio.sleep(3)
             except telegram.error.BadRequest as e:
                 print(f'{e.args}: printing self.updater.bot.send_photo args:\n'
                       f'channel id: {channel_id}\n'

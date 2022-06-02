@@ -205,7 +205,7 @@ class Database:
             self.exec("SELECT name FROM categories WHERE category_id = ?",
                       [cat_id])
             cat_name = self.cursor.fetchone()
-            actives_list.append(f"{cat_id} {cat_name[0]}")
+            actives_list.append(f"{cat_id}) {cat_name[0]}")
         return actives_list
 
     def update_epoch(self, item_epoch: int, cat_id: int) -> None:

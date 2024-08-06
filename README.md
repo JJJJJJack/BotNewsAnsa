@@ -1,4 +1,4 @@
-# BotNewsAnsa :robot:
+# BotNewsAnsa :robot: (Offline)
 Add it into your group chat! You can find it as [`@jacknewsbot`](https://telegram.me/jacknewsbot)
 If you wanna jump straight into using it, send him the command `/help` to see what it can do!
 
